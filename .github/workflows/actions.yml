@@ -1,0 +1,57 @@
+name: build dist
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux-build:
+    name: build on linux
+    runs-on: ubuntu-18.04
+    steps:
+    - name: checkout
+      uses: actions/checkout@v1
+      with:
+        token: 77b6abc438dc55919e3e5e59bb50a40a76d2fd15
+        submodules: recursive
+    - name: apt update
+      run: |
+        sudo apt-get update
+    - name: apt install
+      run: |
+        echo y | sudo apt-get install autogen
+    - name: prepare
+      run: make prepare
+    - name: cache downloads
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/cerbero-sources/
+        key: cerbero-sources
+    - name: cache build-tools
+      uses: actions/cache@v1
+      with:
+        path: cerbero-artifacts/cerbero/build/
+        key: build-tools
+    - name: build
+      run: make package
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./android-lv2-binaries.zip
+        asset_name: android-lv2-binaries.zip
+        asset_content_type: application/zip
+

@@ -1,0 +1,21 @@
+[submodule "cerbero-artifacts/cerbero"]
+	path = cerbero-artifacts/cerbero
+	url = https://github.com/atsushieno/cerbero.git
+[submodule "serd"]
+	path = serd
+	url = https://github.com/atsushieno/serd.git
+[submodule "sord"]
+	path = sord
+	url = https://github.com/atsushieno/sord.git
+[submodule "lilv"]
+	path = lilv
+	url = https://github.com/atsushieno/lilv.git
+[submodule "lv2"]
+	path = lv2
+	url = https://gitlab.com/lv2/lv2.git
+[submodule "sratom"]
+	path = sratom
+	url = https://gitlab.com/lv2/sratom.git
+[submodule "mda-lv2"]
+	path = mda-lv2
+	url = https://gitlab.com/drobilla/mda-lv2.git
