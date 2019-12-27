@@ -22,10 +22,10 @@ all: build
 download-ndk: $(ANDROID_NDK)
 
 $(ANDROID_NDK):
-	wget https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip
-	unzip android-ndk-r20b-linux-x86_64.zip
+	wget https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip >/dev/null
+	unzip android-ndk-r20b-linux-x86_64.zip >/dev/null
 	mkdir -p $(ANDROID_NDK)
-	mv android-ndk-r20b/* $(ANDROID_NDK)/
+	mv android-ndk-r20b/* $(ANDROID_NDK)
 
 .PHONY:
 package: build do-package
