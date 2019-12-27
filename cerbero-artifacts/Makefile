@@ -25,10 +25,10 @@ copy-outputs:
 	mkdir -p ../dist/x86_64
 	mkdir -p ../dist/armeabi-v7a
 	mkdir -p ../dist/arm64-v8a
-	cp -R $(TOP)/cerbero/build/dist/android_x86/* ../dist/x86/
-	cp -R $(TOP)/cerbero/build/dist/android_x86_64/* ../dist/x86_64/
-	cp -R $(TOP)/cerbero/build/dist/android_armv7/* ../dist/armeabi-v7a/
-	cp -R $(TOP)/cerbero/build/dist/android_arm64/* ../dist/arm64-v8a/
+	cp -uR $(TOP)/cerbero/build/dist/android_x86/* ../dist/x86/
+	cp -uR $(TOP)/cerbero/build/dist/android_x86_64/* ../dist/x86_64/
+	cp -uR $(TOP)/cerbero/build/dist/android_armv7/* ../dist/armeabi-v7a/
+	cp -uR $(TOP)/cerbero/build/dist/android_arm64/* ../dist/arm64-v8a/
 
 .PHONY:
 build-native:
