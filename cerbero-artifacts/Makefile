@@ -32,7 +32,7 @@ copy-outputs:
 
 .PHONY:
 build-native:
-	make CERBERO_COMMAND="build libsndfile fluidsynth" run-cerbero-command
+	make CERBERO_COMMAND="build libsndfile" run-cerbero-command
 
 .PHONY:
 run-cerbero-command:
