@@ -69,7 +69,7 @@ build-single-abi:
 	mkdir -p build/$(ABI_FORMAL)
 	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.3 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.4 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS=--copy-headers build-single-no-soname-opt
+	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" build-single-no-soname-opt
 	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=mda-lv2 MODULE_MAJOR=0 build-single-no-soname-opt
