@@ -1,0 +1,5 @@
+{
+    "export_libraries": [
+        "-lserd-0 -lsord-0 -lsratom-0 -llilv-0",
+    ]
+}

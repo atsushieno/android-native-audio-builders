@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <groupId>org.androidaudioplugin</groupId>
+  <artifactId>aap-lv2-natives</artifactId>
+  <version>0.1.0</version>
+  <packaging>aar</packaging>
+  <name>oboe</name>
+  <description>The AAR for AAP LV2 native dependencies.</description>
+  <url>https://github.com/atsushieno/android-native-audio-builders</url>
+  <licenses>
+    <license>
+      <url>https://github.com/atsushieno/android-native-audio-builders/blob/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>atsushieno</name>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/atsushieno/android-native-audio-builders</connection>
+    <url>https://github.com/atsushieno/android-native-audio-builders</url>
+  </scm>
+</project>
+
