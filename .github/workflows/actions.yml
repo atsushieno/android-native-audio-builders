@@ -33,4 +33,17 @@ jobs:
         key: build-tools
     - name: build
       run: make package
+    - name: upload artifact zip
+      if: success()
+      uses: actions/upload-artifact@v1
+      with:
+        name: zip
+        path: android-lv2-binaries.zip
+    - name: upload artifact prefab
+      if: success()
+      uses: actions/upload-artifact@v1
+      with:
+        name: aar
+        path: prefab/aap-lv2-natives/aap-lv2-natives.aar
+
 

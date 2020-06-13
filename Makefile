@@ -28,11 +28,7 @@ $(ANDROID_NDK):
 	mv android-ndk-r20b/* $(ANDROID_NDK)
 
 .PHONY:
-package: build do-package
-
-do-package:
-	rm -f android-lv2-binaries.zip
-	zip -r android-lv2-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
+package: build package-zip package-prefab
 
 .PHONY:
 build: download-ndk build-cerbero-deps build-lv2-stuff
@@ -111,4 +107,13 @@ build-single-no-soname-opt:
 clean-single:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
 	cd build/$(ABI_FORMAL)/$(MODULE) && ./waf clean && cd ../../.. && rm -rf build/$(ABI_FORMAL)/$(MODULE)
+
+.PHONY:
+package-zip:
+	rm -f android-lv2-binaries.zip
+	zip -r android-lv2-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
+
+.PHONY:
+package-prefab:
+	cd prefab && ./build.sh || exit 1 && cd ..
 
