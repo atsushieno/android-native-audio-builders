@@ -2,7 +2,7 @@
 
 PWD=$(shell pwd)
 
-ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/20.0.5594570/
+ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.2.6472646/
 LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-x86_64
 ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/linux-x86_64
 
