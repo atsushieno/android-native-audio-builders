@@ -2,11 +2,32 @@
 
 This repository covers various native library builds for Android, namely:
 
+- 
 - lv2 (serd, sord, lv2, sratom, lilv, mda-lv2)
 
 ## Building for general developers
 
 Run `./build-in-docker.sh` to get a release binary zip on Linux.
+
+## Notes on pkg-config usage
+
+The resulting binary, especially those on github release page, has `*.pc` files (for pkg-config) has path specification on the build machine and therefore they won't work as is on your machine.
+
+You are supposed to rewrite those path specifications (like `prefix`, but not limited to this) with your local path to the specific Android ABI directory in the extracted directory of the (downloaded) archive. For example...
+
+```
+#!/bin/bash
+
+PWD=`pwd`
+PWDESC=${PWD//\//\\\/}
+
+echo $PWDESC
+
+for f in `find dependencies/dist/*/lib/pkgconfig -name *.pc` ; do
+	sed -e "s/\/home\/runner\/work\/android-native-audio-builders\/android-native-audio-builders\/cerbero-artifacts\/cerbero\/build/$PWDESC\/dependencies/g" $f > $f.1;
+	sed -e "s/\/home\/runner\/work\/android-native-audio-builders\/android-native-audio-builders/$PWDESC\/dependencies/g" $f.1 > $f.2 ;
+done
+```
 
 ## Hacking
 
@@ -22,4 +43,4 @@ such a problem: https://www.linuxuprising.com/2018/05/fix-libpng12-0-missing-in-
 On some Linux desktop (maybe after Ubuntu 18.04) lv2 sample plugins fail to build
 for unknown reason. In `Makefile` there is a line that builds lv2 with some options.
 Add `--no-plugins` to avoid such build failures.
-breakage in gtk due to bogus dependencies on 
+
