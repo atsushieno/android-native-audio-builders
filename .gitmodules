@@ -19,3 +19,6 @@
 [submodule "mda-lv2"]
 	path = mda-lv2
 	url = https://gitlab.com/drobilla/mda-lv2.git
+[submodule "guitarix"]
+	path = guitarix
+	url = https://github.com/brummer10/guitarix.git

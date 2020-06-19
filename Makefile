@@ -65,13 +65,15 @@ build-single-abi:
 	mkdir -p build/$(ABI_FORMAL)
 	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.3 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.4 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" build-single-no-soname-opt
+	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" SRCDIR=. build-single-no-soname-opt
 	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=mda-lv2 MODULE_MAJOR=0 build-single-no-soname-opt
+	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
+	make MODULE=guitarix MODULE_MAJOR=0 MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-bluez" SRCDIR=trunk build-single-no-soname-opt
 
 .PHONY:
 clean-single-abi:
+	make MODULE=guitarix SRCDIR=trunk clean-single-detail
 	make MODULE=mda-lv2 clean-single
 	make MODULE=lilv clean-single
 	make MODULE=lv2 clean-single
@@ -81,7 +83,7 @@ clean-single-abi:
 
 .PHONY:
 build-single:
-	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" build-single-no-soname-opt
+	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" SRCDIR=. build-single-no-soname-opt
 	mv dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.$(MODULE_VER) dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so
 	rm dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.0
 
@@ -89,7 +91,7 @@ build-single:
 build-single-no-soname-opt:
 	echo "Building $(MODULE) for $(ABI_FORMAL) ($(ABI_COMPLEX)) ..."
 	mkdir -p build/$(ABI_FORMAL)/$(MODULE)
-	cp -R $(MODULE)/* build/$(ABI_FORMAL)/$(MODULE)/
+	cp -R $(MODULE)/$(SRCDIR)/* build/$(ABI_FORMAL)/$(MODULE)/
 	cd build/$(ABI_FORMAL)/$(MODULE) && \
 	PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" \
 	CC="$(CC)" \
@@ -97,7 +99,7 @@ build-single-no-soname-opt:
 	LD="$(LD)" \
 	CFLAGS="$(CFLAGS)" \
 	LDFLAGS="-landroid $(LDFLAGS)" \
-	./waf -d $(MODULE_OPTIONS) --prefix=../../../dist/$(ABI_FORMAL) configure && \
+	./waf $(MODULE_OPTIONS) --prefix=../../../dist/$(ABI_FORMAL) configure && \
 	echo "autowaf has a horrible issue that it moves away all those required external CFLAGS and it's used everywhere, meaning that making changes to it will mess the future builds. As a workaround, we hack those configure results" && \
 	sed -i -e "s/CFLAGS = \[/CFLAGS = \[$(CFLAGS), /" build/c4che/_cache.py && \
 	./waf -d $(MODULE_OPTIONS) --prefix=../../../dist/$(ABI_FORMAL) build install && \
@@ -105,8 +107,12 @@ build-single-no-soname-opt:
 
 .PHONY:
 clean-single:
+	make MODULE=$(MODULE) SRCDIR=. clean-single-detail
+
+.PHONY:
+clean-single-detail:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
-	cd build/$(ABI_FORMAL)/$(MODULE) && ./waf clean && cd ../../.. && rm -rf build/$(ABI_FORMAL)/$(MODULE)
+	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && ./waf clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
 
 .PHONY:
 package-zip:
