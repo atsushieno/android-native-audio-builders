@@ -5,9 +5,11 @@ PWD=$(shell pwd)
 ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.2.6472646/
 LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-x86_64
 ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/linux-x86_64
+ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
 # for build-single
-PKG_CONFIG_PATH=$(PWD)/dist/$(ABI_FORMAL)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
+DIST_ABI_PATH=$(PWD)/dist/$(ABI_FORMAL)
+PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
 CC=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang
 CXX=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang++
 LD=$(ANDROID_TOOLCHAIN)/bin/$(ABI_COMPLEX)-ld
@@ -38,7 +40,7 @@ build-cerbero-deps:
 	make -C cerbero-artifacts
 
 .PHONY:
-clean: clean-lv2-stuff clean-cerbero-deps 
+clean: clean-lv2-stuff clean-cerbero-deps
 
 clean-cerbero-deps:
 	make -C cerbero-artifacts clean
@@ -84,8 +86,8 @@ clean-single-abi:
 .PHONY:
 build-single:
 	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" SRCDIR=. build-single-no-soname-opt
-	mv dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.$(MODULE_VER) dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so
-	rm dist/$(ABI_FORMAL)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.0
+	mv $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.$(MODULE_VER) $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so
+	rm $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.0
 
 .PHONY:
 build-single-no-soname-opt:
@@ -99,10 +101,10 @@ build-single-no-soname-opt:
 	LD="$(LD)" \
 	CFLAGS="$(CFLAGS)" \
 	LDFLAGS="-landroid $(LDFLAGS)" \
-	./waf $(MODULE_OPTIONS) --prefix=../../../dist/$(ABI_FORMAL) configure && \
+	./waf $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) configure && \
 	echo "autowaf has a horrible issue that it moves away all those required external CFLAGS and it's used everywhere, meaning that making changes to it will mess the future builds. As a workaround, we hack those configure results" && \
 	sed -i -e "s/CFLAGS = \[/CFLAGS = \[$(CFLAGS), /" build/c4che/_cache.py && \
-	./waf -d $(MODULE_OPTIONS) --prefix=../../../dist/$(ABI_FORMAL) build install && \
+	./waf -d $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) build install && \
 	cd ../../.. || exit 1
 
 .PHONY:
