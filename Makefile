@@ -71,7 +71,7 @@ build-single-abi:
 	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
-	make MODULE=guitarix MODULE_MAJOR=0 MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-bluez" SRCDIR=trunk build-single-no-soname-opt
+	make MODULE=guitarix MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="-I$(DIST_ABI_PATH)/include" LDFLAGS="-L$(DIST_ABI_PATH)/lib -lzita-convolver" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-bluez" SRCDIR=trunk build-single-no-soname-opt
 
 .PHONY:
 clean-single-abi:
@@ -102,8 +102,10 @@ build-single-no-soname-opt:
 	CFLAGS="$(CFLAGS)" \
 	LDFLAGS="-landroid $(LDFLAGS)" \
 	./waf $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) configure && \
+	if '$(NO_SED)' == '' ; then \
 	echo "autowaf has a horrible issue that it moves away all those required external CFLAGS and it's used everywhere, meaning that making changes to it will mess the future builds. As a workaround, we hack those configure results" && \
-	sed -i -e "s/CFLAGS = \[/CFLAGS = \[$(CFLAGS), /" build/c4che/_cache.py && \
+	sed -i -e "s/CFLAGS = \[/CFLAGS = \[$(CFLAGS), /" build/c4che/_cache.py ; \
+	fi && \
 	./waf -d $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) build install && \
 	cd ../../.. || exit 1
 
