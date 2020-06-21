@@ -53,7 +53,7 @@ prepare:
 .PHONY:
 copy-eigen: .eigen.stamp
 
-eigen.stamp:
+.eigen.stamp:
 	for a in $(ABIS) ; do \
 		cp -R eigen/Eigen dist/$$a/include ; \
 	done ; \
