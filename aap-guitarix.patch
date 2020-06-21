@@ -84,18 +84,9 @@ index 9e8fdf83..75f6cbd6 100644
      conf.check_cfg(package='eigen3', args='--cflags', uselib_store="EIGEN3", mandatory=1)
 +
 diff --git a/trunk/wscript b/trunk/wscript
-index 2699325f..95390884 100644
+index 2699325f..eab037b5 100644
 --- a/trunk/wscript
 +++ b/trunk/wscript
-@@ -81,7 +81,7 @@ def options(opt):
- 
- 
-     opt.recurse('libgxw/gxw')
--    opt.recurse('libgxwmm/gxwmm')
-+    #opt.recurse('libgxwmm/gxwmm')
- 
-     opt.gxload('zita-resampler')
-     opt.gxload('zita-convolver')
 @@ -116,10 +116,10 @@ def options(opt):
      opt.gxload('lv2')
      opt.gxload('robotofont')
@@ -121,7 +112,14 @@ index 2699325f..95390884 100644
      # linker flags
      conf.env.append_value('LDFLAGS', opt.ldflags.split())
      conf.env['LINKFLAGS'] = conf.env['LDFLAGS']
-@@ -341,8 +341,8 @@ def configure(conf):
+@@ -336,13 +336,13 @@ def configure(conf):
+         conf.check_cfg(package='lilv-0', args='--cflags --libs', uselib_store='LILV', mandatory=1)
+         check_boost(conf)
+ 
+-    conf.gxload('zita-convolver')
+-    conf.gxload('zita-resampler')
++    #conf.gxload('zita-convolver')
++    #conf.gxload('zita-resampler')
      conf.find_program("gperf", var='HAVE_GPERF', mandatory=False)
      conf.gxload('faust')
  
