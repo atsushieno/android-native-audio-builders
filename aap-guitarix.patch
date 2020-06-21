@@ -1,0 +1,158 @@
+diff --git a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
+index 255589e0..380d82fe 100644
+--- a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
++++ b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
+@@ -143,8 +143,7 @@ bool PitchTracker::setParameters(int priority, int policy, int sampleRate, int b
+ }
+ 
+ void PitchTracker::stop_thread() {
+-    pthread_cancel (m_pthr);
+-    pthread_join (m_pthr, NULL);
++    shouldStop = true;
+ }
+ 
+ void PitchTracker::start_thread(int priority, int policy) {
+@@ -153,7 +152,7 @@ void PitchTracker::start_thread(int priority, int policy) {
+     spar.sched_priority = priority;
+     pthread_attr_init(&attr);
+     pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE );
+-    pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
++    //pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
+     pthread_attr_setschedpolicy(&attr, policy);
+     pthread_attr_setschedparam(&attr, &spar);
+     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+@@ -309,6 +308,7 @@ static int findsubMaximum(float *input, int len, float threshold) {
+ 
+ void PitchTracker::run() {
+     for (;;) {
++if (shouldStop) break;
+         busy = false;
+         sem_wait(&m_trig);
+         if (error) {
+diff --git a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
+index 9b0ed3ed..e65481cc 100644
+--- a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
++++ b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
+@@ -85,6 +85,8 @@ class PitchTracker {
+     fftwf_plan      m_fftwPlanFFT;
+     // Plan to compute the IFFT of a given signal (with additional zero-padding).
+     fftwf_plan      m_fftwPlanIFFT;
++// This is a dirty hack to support pthread_cancel() alternative
++bool shouldStop;
+ };
+ 
+ 
+diff --git a/trunk/src/gx_head/engine/gx_pitch_tracker.cpp b/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
+index 6e47a7c8..68408d0b 100644
+--- a/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
++++ b/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
+@@ -65,7 +65,8 @@ PitchTracker::PitchTracker()
+       m_input(new float[FFT_SIZE]),
+       m_audioLevel(false),
+       m_fftwPlanFFT(0),
+-      m_fftwPlanIFFT(0) {
++      m_fftwPlanIFFT(0),
++      shouldStop(false) {
+     const int size = FFT_SIZE + (FFT_SIZE+1) / 2;
+     m_fftwBufferTime = reinterpret_cast<float*>
+                        (fftwf_malloc(size * sizeof(*m_fftwBufferTime)));
+@@ -145,8 +146,7 @@ bool PitchTracker::setParameters(int priority, int policy, int sampleRate, int b
+ 
+ void PitchTracker::stop_thread() {
+     if (m_pthr) {
+-	pthread_cancel (m_pthr);
+-	pthread_join (m_pthr, NULL);
++        shouldStop = true;
+ 	m_pthr = 0;
+     }
+ }
+@@ -322,6 +322,7 @@ static int findsubMaximum(float *input, int len, float threshold) {
+ 
+ void PitchTracker::run() {
+     for (;;) {
++if(shouldStop) break;
+         busy = false;
+         sem_wait(&m_trig);
+         if (error) {
+diff --git a/trunk/wscript b/trunk/wscript
+index 2699325f..95390884 100644
+--- a/trunk/wscript
++++ b/trunk/wscript
+@@ -81,7 +81,7 @@ def options(opt):
+ 
+ 
+     opt.recurse('libgxw/gxw')
+-    opt.recurse('libgxwmm/gxwmm')
++    #opt.recurse('libgxwmm/gxwmm')
+ 
+     opt.gxload('zita-resampler')
+     opt.gxload('zita-convolver')
+@@ -116,10 +116,10 @@ def options(opt):
+     opt.gxload('lv2')
+     opt.gxload('robotofont')
+ 
+-    opt.recurse('pygxw')
+-    opt.recurse('glade-gxw')
++    #opt.recurse('pygxw')
++    #opt.recurse('glade-gxw')
+ 
+-    opt.load('compiler_c') # for pygxw and glade-gxw
++    #opt.load('compiler_c') # for pygxw and glade-gxw
+ 
+     opt.add_option('--dist-tree',
+                    type='string',
+@@ -294,8 +294,8 @@ def configure(conf):
+         conf.find_program('gcov')
+         conf.env['CXXFLAGS'] = conf.env['CFLAGS'] = ['-fprofile-arcs', '-ftest-coverage']
+         conf.env['LDFLAGS'] = ['-lgcov', '-coverage']
+-    if opt.python_wrapper or opt.glade_support:
+-        conf.load('compiler_c')
++    #if opt.python_wrapper or opt.glade_support:
++    #    conf.load('compiler_c')
+     # linker flags
+     conf.env.append_value('LDFLAGS', opt.ldflags.split())
+     conf.env['LINKFLAGS'] = conf.env['LDFLAGS']
+@@ -341,8 +341,8 @@ def configure(conf):
+     conf.find_program("gperf", var='HAVE_GPERF', mandatory=False)
+     conf.gxload('faust')
+ 
+-    if Options.options.generate_resources:
+-        conf.find_program('glib-compile-resources', var='HAVE_GLIB')
++    #if Options.options.generate_resources:
++    #    conf.find_program('glib-compile-resources', var='HAVE_GLIB')
+ 
+     # defines for compilation
+     gxsharedir = os.path.normpath(os.path.join(conf.env['SHAREDIR'], 'gx_head'))
+@@ -375,7 +375,7 @@ def configure(conf):
+     conf.env['DESKAPPS_DIR'] = os.path.normpath(os.path.join(conf.env['SHAREDIR'], 'applications'))
+     conf.env['BIN_NAME'] = APPNAME
+     if opt.lv2:
+-        conf.gxload('strip')
++        # conf.gxload('strip')
+         conf.gxload('lv2')
+     conf.env['LADSPA'] = opt.ladspa
+     conf.env['NEW_LADSPA'] = opt.new_ladspa
+@@ -403,8 +403,8 @@ def configure(conf):
+         conf.recurse('src/LV2');
+ 
+     # config subdirs
+-    conf.recurse('pygxw')
+-    conf.recurse('glade-gxw')
++    #conf.recurse('pygxw')
++    #conf.recurse('glade-gxw')
+     if conf.env['STANDALONE'] or conf.env['LV2GUI'] or conf.env.NEW_LADSPA or conf.env.GX_PYTHON_WRAPPER or conf.env.GX_GLADE_SUPPORT:
+         conf.recurse('libgxwmm')
+         conf.recurse('libgxw/gxw')
+@@ -566,9 +566,9 @@ def build(bld):
+     # process subfolders from here
+     bld.recurse('ladspa')
+     bld.recurse('libgxw/gxw')
+-    bld.recurse('libgxwmm')
+-    bld.recurse('glade-gxw')
+-    bld.recurse('pygxw')
++    #bld.recurse('libgxwmm')
++    #bld.recurse('glade-gxw')
++    #bld.recurse('pygxw')
+     bld.recurse('src/faust')
+     bld.recurse('src/plugins')
+     bld.recurse('rcstyles')
