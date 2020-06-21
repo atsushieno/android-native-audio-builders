@@ -22,3 +22,6 @@
 [submodule "guitarix"]
 	path = guitarix
 	url = https://github.com/brummer10/guitarix.git
+[submodule "eigen"]
+	path = eigen
+	url = https://gitlab.com/libeigen/eigen.git

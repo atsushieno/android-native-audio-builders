@@ -34,7 +34,7 @@ $(ANDROID_NDK):
 package: build package-zip package-prefab
 
 .PHONY:
-build: download-ndk build-cerbero-deps patch-guitarix build-lv2-stuff
+build: download-ndk build-cerbero-deps copy-eigen patch-guitarix build-lv2-stuff
 
 .PHONY:
 build-cerbero-deps:
@@ -49,6 +49,15 @@ clean-cerbero-deps:
 .PHONY:
 prepare:
 	make -C cerbero-artifacts prepare
+
+.PHONY:
+copy-eigen: .eigen.stamp
+
+eigen.stamp:
+	for a in $(ABIS) ; do \
+		cp -R eigen/Eigen dist/$$a/include ; \
+	done ; \
+	touch .eigen.stamp
 
 .PHONY:
 patch-guitarix: guitarix/patch.stamp
