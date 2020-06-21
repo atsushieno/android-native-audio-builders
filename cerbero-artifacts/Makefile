@@ -32,7 +32,7 @@ copy-outputs:
 
 .PHONY:
 build-native:
-	make CERBERO_COMMAND="build libsndfile fftw3 zita-convolver zita-resampler glibmm" run-cerbero-command
+	make CERBERO_COMMAND="build libsndfile fftw3 glibmm" run-cerbero-command
 
 .PHONY:
 run-cerbero-command:
