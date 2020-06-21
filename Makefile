@@ -8,12 +8,14 @@ LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-x86_64
 ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/linux-x86_64
 ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
+ABI_LD=$(ABI_COMPLEX)
+
 # for build-single
 DIST_ABI_PATH=$(PWD)/dist/$(ABI_FORMAL)
 PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
 CC=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang
 CXX=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang++
-LD=$(ANDROID_TOOLCHAIN)/bin/$(ABI_COMPLEX)-ld
+LD=$(ANDROID_TOOLCHAIN)/bin/$(ABI_LD)-ld
 #CFLAGS=--sysroot='$(ANDROID_NDK)/sysroot' -I'$(ANDROID_NDK)/sysroot/usr/include/' -DANDROID
 CFLAGS='-DANDROID'
 
@@ -69,7 +71,7 @@ guitarix/patch.stamp:
 build-lv2-stuff:
 	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-single-abi
 	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-single-abi
-	make ABI_FORMAL=x86 ABI_SIMPLE=x86    ABI_CLANG=i686-linux-android       ABI_COMPLEX=i686-linux-android build-single-abi
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86    ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 build-single-abi
 	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android     ABI_COMPLEX=x86_64-linux-android build-single-abi
 
 clean-lv2-stuff:
