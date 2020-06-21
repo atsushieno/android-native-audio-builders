@@ -10,6 +10,8 @@ ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
 ABI_LD=$(ABI_COMPLEX)
 
+SSE_CLANG_OPT=
+
 # for build-single
 DIST_ABI_PATH=$(PWD)/dist/$(ABI_FORMAL)
 PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
@@ -71,8 +73,8 @@ guitarix/patch.stamp:
 build-lv2-stuff:
 	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-single-abi
 	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-single-abi
-	make ABI_FORMAL=x86 ABI_SIMPLE=x86    ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 build-single-abi
-	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android     ABI_COMPLEX=x86_64-linux-android build-single-abi
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr build-single-abi
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr build-single-abi
 
 clean-lv2-stuff:
 	make ABI_FORMAL=armeabi-v7a clean-single-abi
@@ -90,7 +92,7 @@ build-single-abi:
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
 	# zita-resampler is hack here...
-	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="-I$(DIST_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib " MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
+	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib " MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
 
 .PHONY:
 clean-single-abi:
