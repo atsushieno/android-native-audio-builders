@@ -34,7 +34,7 @@ $(ANDROID_NDK):
 package: build package-zip package-prefab
 
 .PHONY:
-build: download-ndk build-cerbero-deps build-lv2-stuff
+build: download-ndk build-cerbero-deps patch-guitarix build-lv2-stuff
 
 .PHONY:
 build-cerbero-deps:
@@ -49,6 +49,12 @@ clean-cerbero-deps:
 .PHONY:
 prepare:
 	make -C cerbero-artifacts prepare
+
+.PHONY:
+patch-guitarix: guitarix/patch.stamp
+
+guitarix/patch.stamp:
+	cd guitarix && patch -i ../aap-guitarix.patch -p1 && touch patch.stamp
 
 .PHONY:
 build-lv2-stuff:
