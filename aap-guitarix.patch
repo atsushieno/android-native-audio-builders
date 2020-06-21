@@ -74,6 +74,15 @@ index 6e47a7c8..68408d0b 100644
          busy = false;
          sem_wait(&m_trig);
          if (error) {
+diff --git a/trunk/src/plugins/wscript b/trunk/src/plugins/wscript
+index 9e8fdf83..75f6cbd6 100644
+--- a/trunk/src/plugins/wscript
++++ b/trunk/src/plugins/wscript
+@@ -194,3 +194,4 @@ def build(bld):
+ 
+ def configure(conf):
+     conf.check_cfg(package='eigen3', args='--cflags', uselib_store="EIGEN3", mandatory=1)
++
 diff --git a/trunk/wscript b/trunk/wscript
 index 2699325f..95390884 100644
 --- a/trunk/wscript

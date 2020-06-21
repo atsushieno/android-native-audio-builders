@@ -18,7 +18,7 @@ jobs:
         sudo apt-get update
     - name: apt install
       run: |
-        echo y | sudo apt-get install autogen faust
+        echo y | sudo apt-get install autogen faust libeigen3-dev
     - name: prepare
       run: make prepare
     - name: cache downloads
