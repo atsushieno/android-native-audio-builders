@@ -18,7 +18,7 @@ jobs:
         sudo apt-get update
     - name: apt install
       run: |
-        echo y | sudo apt-get install autogen
+        echo y | sudo apt-get install autogen faust
     - name: prepare
       run: make prepare
     - name: cache downloads
