@@ -87,7 +87,8 @@ build-single-abi:
 	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
-	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="-I$(DIST_ABI_PATH)/include" LDFLAGS="-L$(DIST_ABI_PATH)/lib -lzita-convolver -lzita-resampler" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
+	# zita-resampler is hack here...
+	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="-I$(DIST_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib " MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
 
 .PHONY:
 clean-single-abi:
