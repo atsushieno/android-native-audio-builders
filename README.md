@@ -3,8 +3,20 @@
 This repository covers various native library builds for Android, namely:
 
 - lv2 (serd, sord, lv2, sratom, lilv, mda-lv2)
-- fftw3
+- eigen (well, not really; it's just copying headers)
 - guitarix
+
+... as well as dependencies:
+
+- libogg, libvorbis, flac, libsndfile
+- fftw3, zita-convolver, zita-resampler
+- libffi, glib, mm-common, libsigc++, glibmm
+
+although note that they are based on Android-28 which contains iconv API
+in bionic libc. We needed 28 to include certain pthread API IIRC for `zita-*`.
+We may remove `zita-*` stuff mostly because we don't need them anymore
+(they are part of guitarix sources, and guitarix is the only bit that
+needs them).
 
 ## Building for general developers
 
