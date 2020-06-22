@@ -23,9 +23,10 @@ CFLAGS='-DANDROID'
 
 TOP=`pwd`
 
-all: build
+# targets
 
-.PHONY:
+all: build-all
+
 download-ndk: $(ANDROID_NDK)
 
 $(ANDROID_NDK):
@@ -34,13 +35,18 @@ $(ANDROID_NDK):
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r20b/* $(ANDROID_NDK)
 
-.PHONY:
-package: build package-zip package-prefab
+package-all: build-all package-zip package-prefab
 
-.PHONY:
-build: download-ndk build-cerbero-deps copy-eigen patch-guitarix build-lv2-stuff
+build-all: download-ndk  build-lv2-sdk build-guitarix
 
-.PHONY:
+build-lv2-sdk: build-aap-deps build-lv2-sdk-local
+build-aap-deps:
+	make -C cerbero-artifacts build-aap-deps
+
+build-guitarix: build-guitarix-deps  copy-eigen  patch-guitarix  build-guitarix-local
+build-guitarix-deps:
+	make -C cerbero-artifacts build-guitarix-deps
+
 build-cerbero-deps:
 	make -C cerbero-artifacts
 
@@ -54,7 +60,6 @@ clean-cerbero-deps:
 prepare:
 	make -C cerbero-artifacts prepare
 
-.PHONY:
 copy-eigen: .eigen.stamp
 
 .eigen.stamp:
@@ -63,18 +68,22 @@ copy-eigen: .eigen.stamp
 	done ; \
 	touch .eigen.stamp
 
-.PHONY:
 patch-guitarix: guitarix/patch.stamp
 
 guitarix/patch.stamp:
 	cd guitarix && patch -i ../aap-guitarix.patch -p1 && touch patch.stamp
 
-.PHONY:
-build-lv2-stuff:
-	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-single-abi
-	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-single-abi
-	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr build-single-abi
-	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr build-single-abi
+build-lv2-sdk-local:
+	make WAF_BUILD_TARGET=waf-lv2-sdk waf-for-all-abi
+
+build-guitarix-local:
+	make WAF_BUILD_TARGET=waf-guitarix waf-for-all-abi
+
+waf-for-all-abi:
+	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi $(WAF_BUILD_TARGET)
+	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android $(WAF_BUILD_TARGET)
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET)
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET)
 
 clean-lv2-stuff:
 	make ABI_FORMAL=armeabi-v7a clean-single-abi
@@ -82,8 +91,7 @@ clean-lv2-stuff:
 	make ABI_FORMAL=x86 clean-single-abi
 	make ABI_FORMAL=x86_64 clean-single-abi
 
-.PHONY:
-build-single-abi:
+waf-lv2-sdk:
 	mkdir -p build/$(ABI_FORMAL)
 	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.3 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.4 MODULE_OPTIONS="--no-utils" build-single
@@ -91,10 +99,11 @@ build-single-abi:
 	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
 	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
 	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
+
+waf-guitarix:
 	# zita-resampler is hack here...
 	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib " MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
 
-.PHONY:
 clean-single-abi:
 	make MODULE=guitarix SRCDIR=trunk clean-single-detail
 	make MODULE=mda-lv2 clean-single
@@ -104,13 +113,11 @@ clean-single-abi:
 	make MODULE=sord clean-single
 	make MODULE=serd clean-single
 
-.PHONY:
 build-single:
 	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" SRCDIR=. build-single-no-soname-opt
 	mv $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.$(MODULE_VER) $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so
 	rm $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.0
 
-.PHONY:
 build-single-no-soname-opt:
 	echo "Building $(MODULE) for $(ABI_FORMAL) ($(ABI_COMPLEX)) ..."
 	mkdir -p build/$(ABI_FORMAL)/$(MODULE)
@@ -130,21 +137,17 @@ build-single-no-soname-opt:
 	./waf $(WAF_DEBUG) $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) build install && \
 	cd ../../.. || exit 1
 
-.PHONY:
 clean-single:
 	make MODULE=$(MODULE) SRCDIR=. clean-single-detail
 
-.PHONY:
 clean-single-detail:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
 	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && ./waf clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
 
-.PHONY:
 package-zip:
 	rm -f android-lv2-binaries.zip
 	zip -r android-lv2-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
 
-.PHONY:
 package-prefab:
 	cd prefab && ./build.sh || exit 1 && cd ..
 

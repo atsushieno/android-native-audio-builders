@@ -31,8 +31,25 @@ copy-outputs:
 	cp -uR $(TOP)/cerbero/build/dist/android_arm64/* ../dist/arm64-v8a/
 
 .PHONY:
-build-native:
-	make CERBERO_COMMAND="build libsndfile fftw3 glibmm" run-cerbero-command
+build-native: build-aap-deps build-guitarix-deps
+
+.PHONY:
+build-aap-deps:
+	make CERBERO_COMMAND="build libsndfile" run-cerbero-command
+
+.PHONY:
+build-guitarix-deps:
+	make CERBERO_COMMAND="build fftw3 glibmm" run-cerbero-command
+
+.PHONY:
+package-native: package-aap-deps package-guitarix-deps
+
+.PHONY:
+package-aap-deps:
+	make CERBERO_COMMAND="package aap-deps" run-cerbero-command
+.PHONY:
+package-aap-guitarix-deps:
+	make CERBERO_COMMAND="package aap-guitarix-deps" run-cerbero-command
 
 .PHONY:
 run-cerbero-command:
