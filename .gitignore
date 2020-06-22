@@ -1,5 +1,7 @@
 build
 dist
+ref
 android-lv2-binaries.zip
+aap-guitarix-binaries.zip
 android-ndk-r20b-linux-x86_64.zip
 .eigen.stamp

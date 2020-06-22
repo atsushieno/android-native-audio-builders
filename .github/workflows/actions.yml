@@ -37,13 +37,13 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v1
       with:
-        name: zip
+        name: aap-lv2-binaries.zip
         path: android-lv2-binaries.zip
     - name: upload aap artifact prefab
       if: success()
       uses: actions/upload-artifact@v1
       with:
-        name: aar
+        name: aap-lv2-natives.aar
         path: prefab/aap-lv2-natives/aap-lv2-natives.aar
     - name: build
       run: make package-guitarix
@@ -51,7 +51,7 @@ jobs:
       if: success()
       uses: actions/upload-artifact@v1
       with:
-        name: zip
+        name: aap-guitarix-binaries.zip
         path: aap-guitarix-binaries.zip
 
 

@@ -20,15 +20,27 @@ prepare:
 	cd cerbero && ANDROID_NDK_HOME=$(ANDROID_NDK) ./cerbero-uninstalled -c config/cross-android-x86.cbc bootstrap
 
 .PHONY:
-copy-outputs:
-	mkdir -p ../dist/x86
-	mkdir -p ../dist/x86_64
-	mkdir -p ../dist/armeabi-v7a
-	mkdir -p ../dist/arm64-v8a
-	cp -uR $(TOP)/cerbero/build/dist/android_x86/* ../dist/x86/
-	cp -uR $(TOP)/cerbero/build/dist/android_x86_64/* ../dist/x86_64/
-	cp -uR $(TOP)/cerbero/build/dist/android_armv7/* ../dist/armeabi-v7a/
-	cp -uR $(TOP)/cerbero/build/dist/android_arm64/* ../dist/arm64-v8a/
+copy-as-dist:
+	make DESTINATION=dist copy-dist
+
+.PHONY:
+copy-as-ref:
+	make DESTINATION=ref copy-dist
+
+.PHONY:
+copy-dist:
+	mkdir -p ../$(DESTINATION)/x86
+	mkdir -p ../$(DESTINATION)/x86_64
+	mkdir -p ../$(DESTINATION)/armeabi-v7a
+	mkdir -p ../$(DESTINATION)/arm64-v8a
+	cp -uR $(TOP)/cerbero/build/dist/android_x86/* ../$(DESTINATION)/x86/
+	cp -uR $(TOP)/cerbero/build/dist/android_x86_64/* ../$(DESTINATION)/x86_64/
+	cp -uR $(TOP)/cerbero/build/dist/android_armv7/* ../$(DESTINATION)/armeabi-v7a/
+	cp -uR $(TOP)/cerbero/build/dist/android_arm64/* ../$(DESTINATION)/arm64-v8a/
+
+.PHONY:
+clean-dist:
+	rm -rf ../dist/x86 ../dist/x86_64 ../dist/armeabi-v7a ../dist/arm64-v8a
 
 .PHONY:
 build-native: build-aap-deps build-guitarix-deps
@@ -39,7 +51,7 @@ build-aap-deps:
 
 .PHONY:
 build-guitarix-deps:
-	make CERBERO_COMMAND="build fftw3 glibmm" run-cerbero-command
+	make CERBERO_COMMAND="build libsndfile fftw3 glibmm" run-cerbero-command
 
 .PHONY:
 package-native: package-aap-deps package-guitarix-deps

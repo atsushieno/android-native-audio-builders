@@ -14,7 +14,8 @@ SSE_CLANG_OPT=
 
 # for build-single
 DIST_ABI_PATH=$(PWD)/dist/$(ABI_FORMAL)
-PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
+REF_ABI_PATH=$(PWD)/ref/$(ABI_FORMAL)
+PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(REF_ABI_PATH):$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
 CC=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang
 CXX=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang++
 LD=$(ANDROID_TOOLCHAIN)/bin/$(ABI_LD)-ld
@@ -42,16 +43,16 @@ build-all: build-lv2-sdk build-guitarix
 build-lv2-sdk: download-ndk  build-lv2-sdk-deps  build-lv2-sdk-local
 
 build-lv2-sdk-deps:
-	make -C cerbero-artifacts build-aap-deps copy-outputs
+	#make -C cerbero-artifacts build-aap-deps copy-as-dist
 
 build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
 		build-guitarix-local
 
-build-guitarix-deps:
-	make -C cerbero-artifacts build-guitarix-deps copy-outputs
-
-build-cerbero-deps:
-	make -C cerbero-artifacts
+build-guitarix-deps: build-lv2-sdk
+	mkdir -p ref
+	#make -C cerbero-artifacts copy-as-ref
+	cp -R dist/* ref/
+	make -C cerbero-artifacts build-guitarix-deps clean-dist copy-as-dist
 
 .PHONY:
 clean: clean-lv2-stuff clean-cerbero-deps
@@ -105,7 +106,7 @@ waf-lv2-sdk:
 
 waf-guitarix:
 	# zita-resampler is hack here...
-	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib " MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
+	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
 
 clean-single-abi:
 	make MODULE=guitarix SRCDIR=trunk clean-single-detail
@@ -152,6 +153,8 @@ clean-single-detail:
 
 
 ## packaging targets
+
+package-all: package-aap package-guitarix
 
 package-aap: build-lv2-sdk package-aap-zip package-prefab
 
