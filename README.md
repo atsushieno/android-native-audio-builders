@@ -12,9 +12,9 @@ This repository covers various native library builds for Android, namely:
 - libffi, glib, mm-common, libsigc++, glibmm
 
 To build those dependencies, we make full use of 
-[GStreamer/Cerbero](https://github.com/GStreamer/cerbero) build system
- - actually a fork of it - which provides comprehensive automated builds
-for all Android ABI.
+[GStreamer/Cerbero](https://github.com/GStreamer/cerbero) build
+system - actually a fork of it - which provides comprehensive automated
+builds for all Android ABI.
 Unlike [Microsoft/vcpkg](https://github.com/microsoft/vcpkg/) packages
 are up to date well and tailored well for Linux, and unlike AOSP 
 [ndkports](https://android.googlesource.com/platform/tools/ndkports/)
