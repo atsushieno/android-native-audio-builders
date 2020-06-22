@@ -41,11 +41,11 @@ build-all: download-ndk  build-lv2-sdk build-guitarix
 
 build-lv2-sdk: build-aap-deps build-lv2-sdk-local
 build-aap-deps:
-	make -C cerbero-artifacts build-aap-deps
+	make -C cerbero-artifacts build-aap-deps copy-outputs
 
 build-guitarix: build-guitarix-deps  copy-eigen  patch-guitarix  build-guitarix-local
 build-guitarix-deps:
-	make -C cerbero-artifacts build-guitarix-deps
+	make -C cerbero-artifacts build-guitarix-deps copy-outputs
 
 build-cerbero-deps:
 	make -C cerbero-artifacts
