@@ -27,6 +27,8 @@ TOP=`pwd`
 
 all: build-all
 
+## build targets
+
 download-ndk: $(ANDROID_NDK)
 
 $(ANDROID_NDK):
@@ -35,15 +37,16 @@ $(ANDROID_NDK):
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r20b/* $(ANDROID_NDK)
 
-package-all: build-all package-zip package-prefab
+build-all: build-lv2-sdk build-guitarix
 
-build-all: download-ndk  build-lv2-sdk build-guitarix
+build-lv2-sdk: download-ndk  build-lv2-sdk-deps  build-lv2-sdk-local
 
-build-lv2-sdk: build-aap-deps build-lv2-sdk-local
-build-aap-deps:
+build-lv2-sdk-deps:
 	make -C cerbero-artifacts build-aap-deps copy-outputs
 
-build-guitarix: build-guitarix-deps  copy-eigen  patch-guitarix  build-guitarix-local
+build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
+		build-guitarix-local
+
 build-guitarix-deps:
 	make -C cerbero-artifacts build-guitarix-deps copy-outputs
 
@@ -137,6 +140,9 @@ build-single-no-soname-opt:
 	./waf $(WAF_DEBUG) $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) build install && \
 	cd ../../.. || exit 1
 
+
+## clean targets
+
 clean-single:
 	make MODULE=$(MODULE) SRCDIR=. clean-single-detail
 
@@ -144,10 +150,20 @@ clean-single-detail:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
 	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && ./waf clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
 
-package-zip:
+
+## packaging targets
+
+package-aap: build-lv2-sdk package-aap-zip package-prefab
+
+package-guitarix: build-guitarix package-guitarix-zip
+
+package-aap-zip:
 	rm -f android-lv2-binaries.zip
 	zip -r android-lv2-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
 
 package-prefab:
 	cd prefab && ./build.sh || exit 1 && cd ..
 
+package-guitarix-zip:
+	rm -f aap-guitarix-binaries.zip
+	zip -r aap-guitarix-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
