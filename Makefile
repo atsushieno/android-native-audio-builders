@@ -15,7 +15,7 @@ SSE_CLANG_OPT=
 # for build-single
 DIST_ABI_PATH=$(PWD)/dist/$(ABI_FORMAL)
 REF_ABI_PATH=$(PWD)/ref/$(ABI_FORMAL)
-PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(REF_ABI_PATH):$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
+PKG_CONFIG_PATH=$(DIST_ABI_PATH)/lib/pkgconfig:$(REF_ABI_PATH)/lib/pkgconfig:$(PWD)/cerbero-artifacts/outputs/$(ABI_FORMAL)/lib/pkgconfig
 CC=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang
 CXX=$(LLVM_TOOLCHAIN)/bin/$(ABI_CLANG)29-clang++
 LD=$(ANDROID_TOOLCHAIN)/bin/$(ABI_LD)-ld
