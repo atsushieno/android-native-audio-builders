@@ -46,7 +46,7 @@ clean-dist:
 build-native: build-aap-deps build-guitarix-deps
 
 .PHONY:
-build-aap-deps:
+build-libsndfile:
 	make CERBERO_COMMAND="build libsndfile" run-cerbero-command
 
 .PHONY:

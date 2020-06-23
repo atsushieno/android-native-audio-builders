@@ -31,13 +31,13 @@ jobs:
       with:
         path: cerbero-artifacts/cerbero/build/
         key: build-tools
-    - name: build
+    - name: build lv2
       run: make package-aap
     - name: upload aap artifact zip
       if: success()
       uses: actions/upload-artifact@v1
       with:
-        name: aap-lv2-binaries.zip
+        name: android-lv2-binaries.zip
         path: android-lv2-binaries.zip
     - name: upload aap artifact prefab
       if: success()
@@ -45,7 +45,15 @@ jobs:
       with:
         name: aap-lv2-natives.aar
         path: prefab/aap-lv2-natives/aap-lv2-natives.aar
-    - name: build
+    - name: build libsndfile
+      run: make package-libsndfile
+    - name: upload libsndfile artifact zip
+      if: success()
+      uses: actions/upload-artifact@v1
+      with:
+        name: android-libsndfile-binaries.zip
+        path: android-libsndfile-binaries.zip
+    - name: build guitarix
       run: make package-guitarix
     - name: upload guitarix artifact zip
       if: success()

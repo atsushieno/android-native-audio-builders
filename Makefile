@@ -1,12 +1,24 @@
 # This Makefile is to build and copy native LV2 dependencies
 
+# Variables
+
+## Customizible variables
+
+# e.g. make PACKAGING_DO_CLEAN=0 package-guitarix
+PACKAGING_DO_CLEAN=1
+
+ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.2.6472646/
+
+ABIS=armeabi-v7a arm64-v8a x86 x86_64
+
+
+## Internal variables
+
 PWD=$(shell pwd)
 
 WAF_DEBUG=-d
-ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.2.6472646/
 LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-x86_64
 ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/linux-x86_64
-ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
 ABI_LD=$(ABI_COMPLEX)
 
@@ -24,7 +36,9 @@ CFLAGS='-DANDROID'
 
 TOP=`pwd`
 
-# targets
+
+
+# Targets
 
 all: build-all
 
@@ -40,19 +54,19 @@ $(ANDROID_NDK):
 
 build-all: build-lv2-sdk build-guitarix
 
-build-lv2-sdk: download-ndk  build-lv2-sdk-deps  build-lv2-sdk-local
+build-lv2-sdk: download-ndk  build-lv2-sdk-local
 
-build-lv2-sdk-deps:
-	#make -C cerbero-artifacts build-aap-deps copy-as-dist
+build-libsndfile-deps: # directly called by package-libsndfile
+	make -C cerbero-artifacts build-libsndfile copy-as-dist
 
 build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
 		build-guitarix-local
 
 build-guitarix-deps: build-lv2-sdk
 	mkdir -p ref
-	#make -C cerbero-artifacts copy-as-ref
 	cp -R dist/* ref/
-	make -C cerbero-artifacts build-guitarix-deps clean-dist copy-as-dist
+	make clean-local-dist
+	make -C cerbero-artifacts build-guitarix-deps copy-as-dist
 
 .PHONY:
 clean: clean-lv2-stuff clean-cerbero-deps
@@ -151,14 +165,28 @@ clean-single-detail:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
 	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && ./waf clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
 
+clean-local-dist:
+	if [ '$(PACKAGING_DO_CLEAN)' = '1' ] ; then \
+		rm -rf dist/* ; \
+	fi
 
 ## packaging targets
 
-package-all: package-aap package-guitarix
+package-all: package-aap package-libsndfile package-guitarix
 
-package-aap: build-lv2-sdk package-aap-zip package-prefab
+package-aap:
+	# ensure that clean-local-dist is called every time
+	make clean-local-dist build-lv2-sdk package-aap-zip package-prefab
 
-package-guitarix: build-guitarix package-guitarix-zip
+package-libsndfile:
+	# ensure that clean-local-dist is called every time
+	make clean-local-dist build-libsndfile-deps
+	rm -f android-libsndfile-binaries.zip
+	zip -r android-libsndfile-binaries.zip dist
+
+package-guitarix:
+	# ensure that clean-local-dist is called every time
+	make clean-local-dist build-guitarix package-guitarix-zip
 
 package-aap-zip:
 	rm -f android-lv2-binaries.zip
