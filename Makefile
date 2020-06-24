@@ -7,7 +7,8 @@
 # e.g. make PACKAGING_DO_CLEAN=0 package-guitarix
 PACKAGING_DO_CLEAN=1
 
-ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.2.6472646/
+ANDROID_NDK=$(ANDROID_SDK_PATH)/ndk/21.2.6472646/
+HOST_ARCH=`uname | tr '[:upper:]' '[:lower:]'`
 
 ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
@@ -17,8 +18,8 @@ ABIS=armeabi-v7a arm64-v8a x86 x86_64
 PWD=$(shell pwd)
 
 WAF_DEBUG=-d
-LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/linux-x86_64
-ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/linux-x86_64
+LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/$(HOST_ARCH)-x86_64
+ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/$(HOST_ARCH)-x86_64
 
 ABI_LD=$(ABI_COMPLEX)
 
@@ -47,8 +48,8 @@ all: build-all
 download-ndk: $(ANDROID_NDK)
 
 $(ANDROID_NDK):
-	wget https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip >/dev/null
-	unzip android-ndk-r20b-linux-x86_64.zip >/dev/null
+	wget https://dl.google.com/android/repository/android-ndk-r20b-$(HOST_ARCH)-x86_64.zip >/dev/null
+	unzip android-ndk-r20b-$(HOST_ARCH)-x86_64.zip >/dev/null
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r20b/* $(ANDROID_NDK)
 
