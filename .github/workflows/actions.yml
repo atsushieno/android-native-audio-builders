@@ -19,6 +19,8 @@ jobs:
     - name: apt install
       run: |
         echo y | sudo apt-get install autogen faust libeigen3-dev
+    - name: stupid NDK setup workaround for GitHub Actions
+      run: sudo mkdir -p /usr/local/lib/android/sdk/ndk && sudo chmod 777 /usr/local/lib/android/sdk/ndk
     - name: prepare
       run: make prepare
     - name: cache downloads
