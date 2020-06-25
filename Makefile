@@ -147,7 +147,7 @@ build-single-no-soname-opt:
 	CXX="$(CXX)" \
 	LD="$(LD)" \
 	CFLAGS="$(CFLAGS)" \
-	LDFLAGS="-landroid $(LDFLAGS)" \
+	LDFLAGS="-static-libstdc++ -landroid $(LDFLAGS)" \
 	$(EXTRA_ENV) ./waf $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) configure && \
 	if '$(NO_SED)' == '' ; then \
 	echo "autowaf has a horrible issue that it moves away all those required external CFLAGS and it's used everywhere, meaning that making changes to it will mess the future builds. As a workaround, we hack those configure results" && \
