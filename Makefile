@@ -7,7 +7,7 @@
 # e.g. make PACKAGING_DO_CLEAN=0 package-guitarix
 PACKAGING_DO_CLEAN=1
 
-ANDROID_NDK=$(ANDROID_SDK_PATH)/ndk/21.2.6472646/
+ANDROID_NDK=$(ANDROID_SDK_ROOT)/ndk/21.2.6472646/
 HOST_ARCH=`uname | tr '[:upper:]' '[:lower:]'`
 
 ABIS=armeabi-v7a arm64-v8a x86 x86_64
@@ -48,8 +48,8 @@ all: build-all
 download-ndk: $(ANDROID_NDK)
 
 $(ANDROID_NDK):
-	wget https://dl.google.com/android/repository/android-ndk-r20b-$(HOST_ARCH)-x86_64.zip >/dev/null
-	unzip android-ndk-r20b-$(HOST_ARCH)-x86_64.zip >/dev/null
+	wget https://dl.google.com/android/repository/android-ndk-r21b-$(HOST_ARCH)-x86_64.zip >/dev/null
+	unzip android-ndk-r21b-$(HOST_ARCH)-x86_64.zip >/dev/null
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r20b/* $(ANDROID_NDK)
 
