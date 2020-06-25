@@ -51,7 +51,7 @@ $(ANDROID_NDK):
 	wget https://dl.google.com/android/repository/android-ndk-r21b-$(HOST_ARCH)-x86_64.zip >/dev/null
 	unzip android-ndk-r21b-$(HOST_ARCH)-x86_64.zip >/dev/null
 	mkdir -p $(ANDROID_NDK)
-	mv android-ndk-r20b/* $(ANDROID_NDK)
+	mv android-ndk-r21b/* $(ANDROID_NDK)
 
 build-all: build-lv2-sdk build-guitarix
 
