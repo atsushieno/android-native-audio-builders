@@ -7,7 +7,7 @@
 # e.g. make PACKAGING_DO_CLEAN=0 package-guitarix
 PACKAGING_DO_CLEAN=1
 
-ANDROID_NDK=$(ANDROID_SDK_ROOT)/ndk/21.2.6472646/
+ANDROID_NDK=$(ANDROID_SDK_ROOT)/ndk/21.3.6528147/
 HOST_ARCH=`uname | tr '[:upper:]' '[:lower:]'`
 
 ABIS=armeabi-v7a arm64-v8a x86 x86_64
