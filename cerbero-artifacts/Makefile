@@ -3,7 +3,7 @@
 PWD=$(shell pwd)
 
 ABIS_SIMPLE = x86 x86-64 armv7 arm64
-ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/20.0.5594570/
+ANDROID_NDK=/home/$(USER)/Android/Sdk/ndk/21.3.6528147/
 
 TOP=`pwd`
 

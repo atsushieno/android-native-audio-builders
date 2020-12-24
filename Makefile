@@ -99,10 +99,10 @@ build-guitarix-local:
 	make WAF_BUILD_TARGET=waf-guitarix waf-for-all-abi
 
 waf-for-all-abi:
-	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi $(WAF_BUILD_TARGET)
-	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android $(WAF_BUILD_TARGET)
-	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET)
-	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET)
+	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi $(WAF_BUILD_TARGET) || exit 1
+	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android $(WAF_BUILD_TARGET) || exit 1
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET) || exit 1
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr $(WAF_BUILD_TARGET) || exit 1
 
 clean-lv2-stuff:
 	make ABI_FORMAL=armeabi-v7a clean-single-abi
@@ -112,12 +112,12 @@ clean-lv2-stuff:
 
 waf-lv2-sdk:
 	mkdir -p build/$(ABI_FORMAL)
-	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.3 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.4 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" SRCDIR=. build-single-no-soname-opt
-	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.4 build-single
-	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.7 MODULE_OPTIONS="--no-utils" build-single
-	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt
+	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.7 MODULE_OPTIONS="--no-utils" build-single || exit 1
+	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.7 MODULE_OPTIONS="--no-utils" build-single || exit 1
+	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" SRCDIR=. build-single-no-soname-opt || exit 1
+	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.7 build-single || exit 1
+	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.11 MODULE_OPTIONS="--no-utils" build-single || exit 1
+	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt || exit 1
 
 waf-guitarix:
 	# zita-resampler is hack here...
