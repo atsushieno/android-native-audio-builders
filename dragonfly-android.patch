@@ -1,0 +1,19 @@
+diff --git a/Makefile b/Makefile
+index 9993634..d4ec0c3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,6 +8,14 @@ include dpf/Makefile.base.mk
+ 
+ all: libs plugins gen
+ 
++cross-plugins: cross-libs
++	$(MAKE) all -C plugins/dragonfly-hall-reverb
++	$(MAKE) all -C plugins/dragonfly-room-reverb
++	$(MAKE) all -C plugins/dragonfly-plate-reverb
++	$(MAKE) all -C plugins/dragonfly-early-reflections
++cross-libs:
++	$(MAKE) -C common
++
+ # --------------------------------------------------------------
+ 
+ libs:

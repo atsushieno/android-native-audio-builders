@@ -17,6 +17,8 @@ ABIS=armeabi-v7a arm64-v8a x86 x86_64
 
 PWD=$(shell pwd)
 
+ALL_ABIS=armeabi-v7a arm64-v8a x86 x86_64
+
 WAF_DEBUG=-d
 LLVM_TOOLCHAIN=$(ANDROID_NDK)/toolchains/llvm/prebuilt/$(HOST_ARCH)-x86_64
 ANDROID_TOOLCHAIN=$(ANDROID_NDK)/toolchains/$(ABI_COMPLEX)-4.9/prebuilt/$(HOST_ARCH)-x86_64
@@ -53,12 +55,14 @@ $(ANDROID_NDK):
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r21b/* $(ANDROID_NDK)
 
-build-all: build-lv2-sdk build-guitarix
+build-all: build-lv2-sdk build-guitarix build-dragonfly-reverb
 
 build-lv2-sdk: download-ndk  build-lv2-sdk-local
 
 build-libsndfile-deps: # directly called by package-libsndfile
 	make -C cerbero-artifacts build-libsndfile copy-as-dist
+
+build-dragonfly-reverb: download-ndk patch-dragonfly build-dragonfly-local
 
 build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
 		build-guitarix-local
@@ -92,6 +96,11 @@ patch-guitarix: guitarix/patch.stamp
 guitarix/patch.stamp:
 	cd guitarix && patch -i ../aap-guitarix.patch -p1 && touch patch.stamp
 
+patch-dragonfly: dragonfly-reverb/patch.stamp
+
+dragonfly-reverb/patch.stamp:
+	cd dragonfly-reverb && patch -i ../dragonfly-android.patch -p1 && touch patch.stamp
+
 build-lv2-sdk-local:
 	make WAF_BUILD_TARGET=waf-lv2-sdk waf-for-all-abi
 
@@ -124,6 +133,7 @@ waf-guitarix:
 	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-waf-no-soname-opt
 
 clean-single-abi:
+	make MODULE=dragonfly-reverb clean-single-dpf
 	make MODULE=guitarix SRCDIR=trunk clean-single-waf-detail
 	make MODULE=mda-lv2 clean-single-waf
 	make MODULE=lilv clean-single-waf
@@ -157,7 +167,48 @@ build-single-waf-no-soname-opt:
 	cd ../../.. || exit 1
 
 
+build-dragonfly-local:
+	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-dpf-dragonfly || exit 1
+	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
+	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-dpf-dragonfly || exit 1
+	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr build-dpf-dragonfly || exit 1
+	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr build-dpf-dragonfly || exit 1
+	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
+
+build-dpf-dragonfly:
+	make MODULE=dragonfly-reverb \
+		CFLAGS=" -mfloat-abi=softfp -mfpu=vfp -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include" \
+		CXXFLAGS=" -mfloat-abi=softfp -mfpu=vfp -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include" \
+		LDFLAGS=" -mfloat-abi=softfp -mfpu=vfp -L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" \
+		build-single-dpf
+
+build-single-dpf:
+	echo "Building $(MODULE) for $(ABI_FORMAL) ($(ABI_COMPLEX)) ..."
+	mkdir -p build/$(ABI_FORMAL)/$(MODULE)
+	cp -R $(MODULE)/$(SRCDIR)/* build/$(ABI_FORMAL)/$(MODULE)/
+	cd build/$(ABI_FORMAL)/$(MODULE) && \
+	PKG_CONFIG_PATH="$(PKG_CONFIG_PATH)" \
+	CC="$(CC)" \
+	CXX="$(CXX)" \
+	LD="$(LD)" \
+	CFLAGS="$(CFLAGS) -DANDROID=1" \
+	CXXFLAGS="$(CXXFLAGS) -DANDROID=1" \
+	LDFLAGS="-static-libstdc++ -landroid $(LDFLAGS)" \
+	make cross-plugins CROSS_COMPILING=true UI_TYPE=none $(MODULE_OPTIONS) && \
+	cd ../../.. || exit 1
+	# make $(MODULE_OPTIONS) --prefix=$(DIST_ABI_PATH) install && \
+
 ## clean targets
+
+clean-single-dpf:
+	make MODULE=$(MODULE) SRCDIR=. clean-single-dpf-detail
+
+clean-single-dpf-detail:
+	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
+	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && make clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
+
 
 clean-single-waf:
 	make MODULE=$(MODULE) SRCDIR=. clean-single-waf-detail
@@ -173,7 +224,7 @@ clean-local-dist:
 
 ## packaging targets
 
-package-all: package-aap package-libsndfile package-guitarix
+package-all: package-aap package-libsndfile package-guitarix package-dragonfly-reverb
 
 package-aap:
 	# ensure that clean-local-dist is called every time
@@ -189,6 +240,9 @@ package-guitarix:
 	# ensure that clean-local-dist is called every time
 	make clean-local-dist build-guitarix package-guitarix-zip
 
+package-dragonfly-reverb:
+	make clean-local-dist build-dragonfly-reverb package-dragonfly-zip
+
 package-aap-zip:
 	rm -f android-lv2-binaries.zip
 	zip -r android-lv2-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
@@ -199,3 +253,11 @@ package-prefab:
 package-guitarix-zip:
 	rm -f aap-guitarix-binaries.zip
 	zip -r aap-guitarix-binaries.zip dist -x '*/doc/*' -x '*/man/*' -x '*/lv2specgen/*'
+
+package-dragonfly-zip:
+	rm -f android-dragonfly-reverb-binaries.zip
+	for abi in $(ALL_ABIS) ; do \
+	mkdir -p dist/$$abi ; \
+	cp -R build/$$abi/dragonfly-reverb/bin/* dist/$$abi ; \
+	done
+	zip -r android-dragonfly-reverb-binaries.zip dist 

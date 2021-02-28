@@ -67,5 +67,12 @@ jobs:
       with:
         name: aap-guitarix-binaries.zip
         path: aap-guitarix-binaries.zip
-
+    - name: build dragonfly-reverb
+      run: make package-dragonfly-reverb
+    - name: upload dragonfly-reverb artifact zip
+      if: success()
+      uses: actions/upload-artifact@v1
+      with:
+        name: android-dragonfly-reverb-binaries.zip
+        path: android-dragonfly-reverb-binaries.zip
 

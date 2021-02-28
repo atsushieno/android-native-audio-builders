@@ -25,3 +25,6 @@
 [submodule "eigen"]
 	path = eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "dragonfly-reverb"]
+	path = dragonfly-reverb
+	url = https://github.com/michaelwillis/dragonfly-reverb.git
