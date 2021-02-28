@@ -112,32 +112,32 @@ clean-lv2-stuff:
 
 waf-lv2-sdk:
 	mkdir -p build/$(ABI_FORMAL)
-	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.7 MODULE_OPTIONS="--no-utils" build-single || exit 1
-	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.7 MODULE_OPTIONS="--no-utils" build-single || exit 1
-	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" SRCDIR=. build-single-no-soname-opt || exit 1
-	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.7 build-single || exit 1
-	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.11 MODULE_OPTIONS="--no-utils" build-single || exit 1
-	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-no-soname-opt || exit 1
+	make MODULE=serd MODULE_MAJOR=0 MODULE_VER=0.30.7 MODULE_OPTIONS="--no-utils" build-single-waf || exit 1
+	make MODULE=sord MODULE_MAJOR=0 MODULE_VER=0.16.7 MODULE_OPTIONS="--no-utils" build-single-waf || exit 1
+	make MODULE=lv2 MODULE_MAJOR=0 MODULE_OPTIONS="--copy-headers --no-plugins" SRCDIR=. build-single-waf-no-soname-opt || exit 1
+	make MODULE=sratom MODULE_MAJOR=0 MODULE_VER=0.6.7 build-single-waf || exit 1
+	make MODULE=lilv MODULE_MAJOR=0 MODULE_VER=0.24.11 MODULE_OPTIONS="--no-utils" build-single-waf || exit 1
+	make MODULE=mda-lv2 MODULE_MAJOR=0 SRCDIR=. build-single-waf-no-soname-opt || exit 1
 
 waf-guitarix:
 	# zita-resampler is hack here...
-	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-no-soname-opt
+	make MODULE=guitarix EXTRA_ENV="GX_PYTHON_WRAPPER=0" WAF_DEBUG=" " MODULE_MAJOR=0 NO_SED=1 CXXFLAGS="$(SSE_CLANG_OPT) -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include -I$(PWD)/guitarix/trunk/src/zita-resampler-1.1.0" LDFLAGS="-L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" MODULE_OPTIONS="--no-standalone --no-lv2-gui --no-avahi --no-avahi --no-bluez --disable-sse" SRCDIR=trunk build-single-waf-no-soname-opt
 
 clean-single-abi:
-	make MODULE=guitarix SRCDIR=trunk clean-single-detail
-	make MODULE=mda-lv2 clean-single
-	make MODULE=lilv clean-single
-	make MODULE=lv2 clean-single
-	make MODULE=sratom clean-single
-	make MODULE=sord clean-single
-	make MODULE=serd clean-single
+	make MODULE=guitarix SRCDIR=trunk clean-single-waf-detail
+	make MODULE=mda-lv2 clean-single-waf
+	make MODULE=lilv clean-single-waf
+	make MODULE=lv2 clean-single-waf
+	make MODULE=sratom clean-single-waf
+	make MODULE=sord clean-single-waf
+	make MODULE=serd clean-single-waf
 
-build-single:
-	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" SRCDIR=. build-single-no-soname-opt
+build-single-waf:
+	make LDFLAGS="-Wl,-soname,lib$(MODULE)-$(MODULE_MAJOR).so" SRCDIR=. build-single-waf-no-soname-opt
 	mv $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.$(MODULE_VER) $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so
 	rm $(DIST_ABI_PATH)/lib/lib$(MODULE)-$(MODULE_MAJOR).so.0
 
-build-single-no-soname-opt:
+build-single-waf-no-soname-opt:
 	echo "Building $(MODULE) for $(ABI_FORMAL) ($(ABI_COMPLEX)) ..."
 	mkdir -p build/$(ABI_FORMAL)/$(MODULE)
 	cp -R $(MODULE)/$(SRCDIR)/* build/$(ABI_FORMAL)/$(MODULE)/
@@ -159,10 +159,10 @@ build-single-no-soname-opt:
 
 ## clean targets
 
-clean-single:
-	make MODULE=$(MODULE) SRCDIR=. clean-single-detail
+clean-single-waf:
+	make MODULE=$(MODULE) SRCDIR=. clean-single-waf-detail
 
-clean-single-detail:
+clean-single-waf-detail:
 	# It looks too verbose steps, but ensures that we don't accidentaly remove unexpected directory (e.g. what happens if ABI_FORMAL and MODULE are empty?)
 	pushd . && cd build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR) && ./waf clean && popd && rm -rf build/$(ABI_FORMAL)/$(MODULE)/$(SRCDIR)
 
