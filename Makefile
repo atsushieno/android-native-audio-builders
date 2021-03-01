@@ -62,7 +62,7 @@ build-lv2-sdk: download-ndk  build-lv2-sdk-local
 build-libsndfile-deps: # directly called by package-libsndfile
 	make -C cerbero-artifacts build-libsndfile copy-as-dist
 
-build-dragonfly-reverb: download-ndk patch-dragonfly build-dragonfly-local
+build-dragonfly-reverb: download-ndk patch-dragonfly do-build-dragonfly
 
 build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
 		build-guitarix-local
@@ -167,15 +167,20 @@ build-single-waf-no-soname-opt:
 	cd ../../.. || exit 1
 
 
-build-dragonfly-local:
+do-build-dragonfly:
+	rm -rf dragonfly-ttls
+	cd dragonfly-reverb && make && cp -R bin ../dragonfly-ttls && \
+		git clean -xdf && touch patch.stamp || exit 1
+	# note the those `rm`s are without -rf and thus preserves *.lv2 directories
+	rm dragonfly-ttls/* || true # continue
+	rm dragonfly-ttls/*/*.so || true # continue
 	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-dpf-dragonfly || exit 1
-	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
 	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-dpf-dragonfly || exit 1
-	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
-	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 SSE_CLANG_OPT=-mfxsr build-dpf-dragonfly || exit 1
-	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
-	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 SSE_CLANG_OPT=-mfxsr build-dpf-dragonfly || exit 1
-	cd dragonfly-reverb && make && git clean -xdf && cd .. # for .ttl files
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 build-dpf-dragonfly || exit 1
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 build-dpf-dragonfly || exit 1
+	for abi in $(ALL_ABIS) ; do \
+		cp -R dragonfly-ttls/* build/$$abi/dragonfly-reverb/bin/ || exit 1 ; \
+	done
 
 build-dpf-dragonfly:
 	make MODULE=dragonfly-reverb \
