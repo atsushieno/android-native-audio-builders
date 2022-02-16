@@ -1,5 +1,5 @@
 diff --git a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
-index 255589e0..380d82fe 100644
+index fcb96e04..91a3a302 100644
 --- a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
 +++ b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.cpp
 @@ -143,8 +143,7 @@ bool PitchTracker::setParameters(int priority, int policy, int sampleRate, int b
@@ -30,10 +30,10 @@ index 255589e0..380d82fe 100644
          sem_wait(&m_trig);
          if (error) {
 diff --git a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
-index 9b0ed3ed..e65481cc 100644
+index 54333290..f2c59c91 100644
 --- a/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
 +++ b/trunk/src/LV2/gxtuner.lv2/gx_pitch_tracker.h
-@@ -85,6 +85,8 @@ class PitchTracker {
+@@ -87,6 +87,8 @@ class PitchTracker {
      fftwf_plan      m_fftwPlanFFT;
      // Plan to compute the IFFT of a given signal (with additional zero-padding).
      fftwf_plan      m_fftwPlanIFFT;
@@ -43,7 +43,7 @@ index 9b0ed3ed..e65481cc 100644
  
  
 diff --git a/trunk/src/gx_head/engine/gx_pitch_tracker.cpp b/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
-index 6e47a7c8..68408d0b 100644
+index 3e3bd8a4..1d29e6ab 100644
 --- a/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
 +++ b/trunk/src/gx_head/engine/gx_pitch_tracker.cpp
 @@ -65,7 +65,8 @@ PitchTracker::PitchTracker()
@@ -84,7 +84,7 @@ index 9e8fdf83..75f6cbd6 100644
      conf.check_cfg(package='eigen3', args='--cflags', uselib_store="EIGEN3", mandatory=1)
 +
 diff --git a/trunk/wscript b/trunk/wscript
-index 2699325f..eab037b5 100644
+index c76a8263..9ad5fa70 100644
 --- a/trunk/wscript
 +++ b/trunk/wscript
 @@ -116,10 +116,10 @@ def options(opt):
@@ -101,7 +101,7 @@ index 2699325f..eab037b5 100644
  
      opt.add_option('--dist-tree',
                     type='string',
-@@ -294,8 +294,8 @@ def configure(conf):
+@@ -305,8 +305,8 @@ def configure(conf):
          conf.find_program('gcov')
          conf.env['CXXFLAGS'] = conf.env['CFLAGS'] = ['-fprofile-arcs', '-ftest-coverage']
          conf.env['LDFLAGS'] = ['-lgcov', '-coverage']
@@ -112,7 +112,7 @@ index 2699325f..eab037b5 100644
      # linker flags
      conf.env.append_value('LDFLAGS', opt.ldflags.split())
      conf.env['LINKFLAGS'] = conf.env['LDFLAGS']
-@@ -336,13 +336,13 @@ def configure(conf):
+@@ -348,13 +348,13 @@ def configure(conf):
          conf.check_cfg(package='lilv-0', args='--cflags --libs', uselib_store='LILV', mandatory=1)
          check_boost(conf)
  
@@ -130,7 +130,7 @@ index 2699325f..eab037b5 100644
  
      # defines for compilation
      gxsharedir = os.path.normpath(os.path.join(conf.env['SHAREDIR'], 'gx_head'))
-@@ -375,7 +375,7 @@ def configure(conf):
+@@ -389,7 +389,7 @@ def configure(conf):
      conf.env['DESKAPPS_DIR'] = os.path.normpath(os.path.join(conf.env['SHAREDIR'], 'applications'))
      conf.env['BIN_NAME'] = APPNAME
      if opt.lv2:
@@ -139,18 +139,18 @@ index 2699325f..eab037b5 100644
          conf.gxload('lv2')
      conf.env['LADSPA'] = opt.ladspa
      conf.env['NEW_LADSPA'] = opt.new_ladspa
-@@ -403,8 +403,8 @@ def configure(conf):
-         conf.recurse('src/LV2');
+@@ -418,8 +418,8 @@ def configure(conf):
  
      # config subdirs
--    conf.recurse('pygxw')
--    conf.recurse('glade-gxw')
-+    #conf.recurse('pygxw')
-+    #conf.recurse('glade-gxw')
-     if conf.env['STANDALONE'] or conf.env['LV2GUI'] or conf.env.NEW_LADSPA or conf.env.GX_PYTHON_WRAPPER or conf.env.GX_GLADE_SUPPORT:
+     if conf.env['STANDALONE'] or conf.env.NEW_LADSPA or conf.env.GX_PYTHON_WRAPPER or conf.env.GX_GLADE_SUPPORT:
+-        conf.recurse('pygxw')
+-        conf.recurse('glade-gxw')
++        #conf.recurse('pygxw')
++        #conf.recurse('glade-gxw')
          conf.recurse('libgxwmm')
          conf.recurse('libgxw/gxw')
-@@ -566,9 +566,9 @@ def build(bld):
+         conf.recurse('rcstyles')
+@@ -580,9 +580,9 @@ def build(bld):
      # process subfolders from here
      bld.recurse('ladspa')
      bld.recurse('libgxw/gxw')
