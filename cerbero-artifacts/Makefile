@@ -51,7 +51,7 @@ build-libsndfile:
 
 .PHONY:
 build-guitarix-deps:
-	make CERBERO_COMMAND="build libsndfile fftw3 libsigc++" run-cerbero-command
+	make CERBERO_COMMAND="build fftw3 libsigc++" run-cerbero-command
 
 .PHONY:
 package-native: package-aap-deps package-guitarix-deps
