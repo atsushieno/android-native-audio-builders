@@ -1,10 +1,11 @@
 build
 dist
 ref
+.eigen.stamp
+android-ndk-r20b-linux-x86_64.zip
 android-lv2-binaries.zip
 aap-guitarix-binaries.zip
-android-ndk-r20b-linux-x86_64.zip
-.eigen.stamp
+android-libsndfile-binaries.zip
 dragonfly-ttls
 android-dragonfly-reverb-binaries.zip
 string-machine-ttls
