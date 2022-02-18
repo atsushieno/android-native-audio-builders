@@ -7,6 +7,10 @@
 # e.g. make PACKAGING_DO_CLEAN=0 package-guitarix
 PACKAGING_DO_CLEAN=1
 
+ifeq ('$(ANDROID_SDK_ROOT)', '')
+ANDROID_SDK_ROOT=$(HOME)/Android/Sdk
+endif
+
 ANDROID_NDK=$(ANDROID_SDK_ROOT)/ndk/21.3.6528147/
 HOST_ARCH=`uname | tr '[:upper:]' '[:lower:]'`
 
