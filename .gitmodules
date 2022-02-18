@@ -28,3 +28,6 @@
 [submodule "dragonfly-reverb"]
 	path = dragonfly-reverb
 	url = https://github.com/michaelwillis/dragonfly-reverb.git
+[submodule "string-machine"]
+	path = string-machine
+	url = https://github.com/jpcima/string-machine.git

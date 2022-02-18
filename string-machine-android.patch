@@ -1,0 +1,15 @@
+diff --git a/Makefile b/Makefile
+index 7bfd273..8f8b83f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -18,6 +18,10 @@ VSTDIR ?= $(LIBDIR)/vst
+ 
+ all: plugins gen
+ 
++cross-plugins:
++	$(foreach p,$(PLUGINS),$(MAKE) all -C plugins/$(p);)
++
++
+ # --------------------------------------------------------------
+ 
+ PLUGINS := string-machine string-machine-chorus string-machine-chorus-stereo

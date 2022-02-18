@@ -76,4 +76,12 @@ jobs:
       with:
         name: android-dragonfly-reverb-binaries.zip
         path: android-dragonfly-reverb-binaries.zip
+    - name: build string-machine
+      run: make package-string-machine
+    - name: upload string-machine artifact zip
+      if: success()
+      uses: actions/upload-artifact@v1
+      with:
+        name: android-string-machine-binaries.zip
+        path: android-string-machine-binaries.zip
 

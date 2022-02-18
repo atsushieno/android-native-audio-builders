@@ -59,7 +59,7 @@ $(ANDROID_NDK):
 	mkdir -p $(ANDROID_NDK)
 	mv android-ndk-r21b/* $(ANDROID_NDK)
 
-build-all: build-lv2-sdk build-guitarix build-dragonfly-reverb
+build-all: build-lv2-sdk build-guitarix build-dragonfly-reverb build-string-machine
 
 build-lv2-sdk: download-ndk  build-lv2-sdk-local
 
@@ -67,6 +67,8 @@ build-libsndfile-deps: # directly called by package-libsndfile
 	make -C cerbero-artifacts build-libsndfile copy-as-dist
 
 build-dragonfly-reverb: download-ndk patch-dragonfly do-build-dragonfly
+
+build-string-machine: download-ndk  patch-string-machine do-build-string-machine
 
 build-guitarix: download-ndk  build-guitarix-deps  copy-eigen  patch-guitarix \
 		build-guitarix-local
@@ -104,6 +106,11 @@ patch-dragonfly: dragonfly-reverb/patch.stamp
 
 dragonfly-reverb/patch.stamp:
 	cd dragonfly-reverb && patch -i ../dragonfly-android.patch -p1 && touch patch.stamp
+
+patch-string-machine: string-machine/patch.stamp
+
+string-machine/patch.stamp:
+	cd string-machine && patch -i ../string-machine-android.patch -p1 && touch patch.stamp
 
 build-lv2-sdk-local:
 	make WAF_BUILD_TARGET=waf-lv2-sdk waf-for-all-abi
@@ -193,6 +200,28 @@ build-dpf-dragonfly:
 		LDFLAGS=" -mfloat-abi=softfp -mfpu=vfp -L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" \
 		build-single-dpf
 
+do-build-string-machine:
+	rm -rf string-machine-ttls
+	cd string-machine && make && cp -R bin ../string-machine-ttls && \
+		git clean -xdf && touch patch.stamp || exit 1
+	# note the those `rm`s are without -rf and thus preserves *.lv2 directories
+	rm string-machine-ttls/* || true # continue
+	rm string-machine-ttls/*/*.so || true # continue
+	make ABI_FORMAL=armeabi-v7a ABI_SIMPLE=armv7  ABI_CLANG=armv7a-linux-androideabi ABI_COMPLEX=arm-linux-androideabi build-dpf-string-machine || exit 1
+	make ABI_FORMAL=arm64-v8a ABI_SIMPLE=arm64  ABI_CLANG=aarch64-linux-android    ABI_COMPLEX=aarch64-linux-android build-dpf-string-machine || exit 1
+	make ABI_FORMAL=x86 ABI_SIMPLE=x86 ABI_CLANG=i686-linux-android ABI_LD=i686-linux-android ABI_COMPLEX=x86 build-dpf-string-machine || exit 1
+	make ABI_FORMAL=x86_64 ABI_SIMPLE=x86-64 ABI_CLANG=x86_64-linux-android ABI_LD=x86_64-linux-android ABI_COMPLEX=x86_64 build-dpf-string-machine || exit 1
+	for abi in $(ALL_ABIS) ; do \
+		cp -R string-machine-ttls/* build/$$abi/string-machine/bin/ || exit 1 ; \
+	done
+
+build-dpf-string-machine:
+	make MODULE=string-machine \
+		CFLAGS=" -mfloat-abi=softfp -mfpu=vfp -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include" \
+		CXXFLAGS=" -mfloat-abi=softfp -mfpu=vfp -I$(DIST_ABI_PATH)/include -I$(REF_ABI_PATH)/include" \
+		LDFLAGS=" -mfloat-abi=softfp -mfpu=vfp -L$(DIST_ABI_PATH)/lib -L$(REF_ABI_PATH)/lib" \
+		build-single-dpf
+
 build-single-dpf:
 	echo "Building $(MODULE) for $(ABI_FORMAL) ($(ABI_COMPLEX)) ..."
 	mkdir -p build/$(ABI_FORMAL)/$(MODULE)
@@ -233,7 +262,7 @@ clean-local-dist:
 
 ## packaging targets
 
-package-all: package-aap package-libsndfile package-guitarix package-dragonfly-reverb
+package-all: package-aap package-libsndfile package-guitarix package-dragonfly-reverb package-string-machine
 
 package-aap:
 	# ensure that clean-local-dist is called every time
@@ -251,6 +280,9 @@ package-guitarix:
 
 package-dragonfly-reverb:
 	make clean-local-dist build-dragonfly-reverb package-dragonfly-zip
+
+package-string-machine:
+	make clean-local-dist build-string-machine package-string-machine-zip
 
 package-aap-zip:
 	rm -f android-lv2-binaries.zip
@@ -270,3 +302,11 @@ package-dragonfly-zip:
 	cp -R build/$$abi/dragonfly-reverb/bin/* dist/$$abi ; \
 	done
 	zip -r android-dragonfly-reverb-binaries.zip dist 
+
+package-string-machine-zip:
+	rm -f android-string-machine-binaries.zip
+	for abi in $(ALL_ABIS) ; do \
+	mkdir -p dist/$$abi ; \
+	cp -R build/$$abi/string-machine/bin/* dist/$$abi ; \
+	done
+	zip -r android-string-machine-binaries.zip dist 
